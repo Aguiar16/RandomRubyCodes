@@ -1,0 +1,87 @@
+class Array
+	def to_xls
+	  content = ''
+	  self.each do |row|
+		row.map! {|col| col = col.to_s.gsub(/(\t|\r\n|\r|\n)/sim, " ").gsub(/ +/, " ") }
+		content << row.join("\t")
+		content << "\n"
+	  end
+	  content
+	end
+end
+#função para calcular o TEC
+def tec()
+	i = 0
+	algorithmtec = 5
+	until i >= 0.33 && i < 0.66 do
+		i = (rand())
+		if i < 0.33
+			algorithmtec -= 1
+		elsif i >= 0.66
+			algorithmtec += 1
+		end
+	end
+	tempo = 60 / algorithmtec
+end
+
+def tempos_de_chegada ()
+	xls = [
+	['Numero do Cliente','Tempo desde a ultima chegada', 'Tempo de chegada no relogio', 'Tempo de atendimento', 'Inicio do Servico no relogio','Tempo de Espera', 'Tempo final de atendimento', 'Tempo do cliente no banco','Tempo livre do caixa']
+   ]
+  
+	  atendimento = 0 # iniciando as instancias <<<<<<<
+	  tempo_total = 0
+	  tempo = 0
+	  tempo_final_atendimento = 0
+	  for j in 1..20
+		  #numero do cliente
+		  cliente = j
+		  #tempo de chegada
+		  tempo = tec()
+
+		  #tempo total de chegada
+		  tempo_total_anterior = tempo_total
+		  tempo_total = tempo_total + tempo
+  
+		  #atendimento / tempo de serviço
+		  atendimento_anterior = atendimento
+			atendimento = (Math::log(rand())*10)*-1
+  
+		  #inicio de serviço
+		  if j > 1
+			  inicio = [atendimento_anterior, tempo].max + tempo_total_anterior
+		  else
+			  inicio = tempo
+		  end
+  
+		  #tempo de espera
+		  if j> 1
+			  espera = atendimento_anterior - tempo
+		  else
+			  espera = 0
+		  end
+		  if espera < 0 
+			  espera = 0 
+		  end
+  
+		  #tempo final de atendimento no relogio
+		  tempo_final_atendimento_anterior = tempo_final_atendimento
+		  tempo_final_atendimento = inicio + atendimento
+  
+		  #tempo do cliente no banco
+		  tempo_banco = espera + atendimento
+  
+		  #tempo livre do caixa
+		  tempo_livre = tempo_total - tempo_final_atendimento_anterior
+		  if tempo_livre < 0
+			 tempo_livre = 0
+		  end
+		  #round(2) para arrendondar os valores pra 2 casas decimais
+		  xls << [cliente, tempo.round(2), tempo_total.round(2), atendimento.round(2), inicio.round(2), espera.round(2), tempo_final_atendimento.round(2), tempo_banco.round(2), tempo_livre.round(2)]
+	  end
+	  f = File.new("Resultado.xlsx", "w+")
+	  f << xls.to_xls
+	  f.close
+end
+  
+ tempos_de_chegada
